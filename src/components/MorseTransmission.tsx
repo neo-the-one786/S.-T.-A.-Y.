@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/purity */
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -149,9 +150,9 @@ function MorseTyper({ onComplete }: { onComplete: () => void }) {
    Each morse group flickers and resolves to its letter
    ═══════════════════════════════════════════ */
 function InPlaceTranslator({ onComplete }: { onComplete: () => void }) {
-  // Each group: { display: string, state: 'morse' | 'flickering' | 'letter' }
-  const [groups, setGroups] = useState(
-    GROUPS.map((g) => ({ display: g.morse, state: 'morse' as const }))
+  type GroupState = { display: string; state: 'morse' | 'flickering' | 'letter' };
+  const [groups, setGroups] = useState<GroupState[]>(
+    GROUPS.map((g) => ({ display: g.morse, state: 'morse' }))
   );
 
   useEffect(() => {

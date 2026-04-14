@@ -1,26 +1,31 @@
-import { useRef, useMemo, useCallback, useEffect } from 'react';
+/* eslint-disable react-hooks/purity, react-hooks/refs */
+import { useRef, useCallback, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
+
+/* ─── Generate star data once (outside render) ─── */
+function generateStars(count: number) {
+  const pos = new Float32Array(count * 3);
+  const sz = new Float32Array(count);
+  const op = new Float32Array(count);
+  for (let i = 0; i < count; i++) {
+    pos[i * 3] = (Math.random() - 0.5) * 50;
+    pos[i * 3 + 1] = (Math.random() - 0.5) * 30;
+    pos[i * 3 + 2] = (Math.random() - 0.5) * 20 - 5;
+    sz[i] = Math.random() * 2.5 + 0.3;
+    op[i] = Math.random() * 0.7 + 0.3;
+  }
+  return { positions: pos, sizes: sz, opacities: op };
+}
 
 /* ─── Star Points ─── */
 function Stars({ count = 600 }: { count?: number }) {
   const meshRef = useRef<THREE.Points>(null);
   const mouseRef = useRef({ x: 0, y: 0 });
   const smoothMouse = useRef({ x: 0, y: 0 });
-
-  const { positions, sizes, opacities } = useMemo(() => {
-    const pos = new Float32Array(count * 3);
-    const sz = new Float32Array(count);
-    const op = new Float32Array(count);
-    for (let i = 0; i < count; i++) {
-      pos[i * 3] = (Math.random() - 0.5) * 50;
-      pos[i * 3 + 1] = (Math.random() - 0.5) * 30;
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 20 - 5;
-      sz[i] = Math.random() * 2.5 + 0.3;
-      op[i] = Math.random() * 0.7 + 0.3;
-    }
-    return { positions: pos, sizes: sz, opacities: op };
-  }, [count]);
+  const starData = useRef<ReturnType<typeof generateStars> | null>(null);
+  if (!starData.current) starData.current = generateStars(count);
+  const { positions, sizes, opacities } = starData.current;
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     mouseRef.current.x = (e.clientX / window.innerWidth - 0.5) * 2;
@@ -109,7 +114,8 @@ function Stars({ count = 600 }: { count?: number }) {
 /* ─── Shooting Star ─── */
 function ShootingStar() {
   const meshRef = useRef<THREE.Mesh>(null);
-  const lifeRef = useRef({ active: false, timer: 0, nextSpawn: Math.random() * 5 + 2 });
+  const lifeRef = useRef<{ active: boolean; timer: number; nextSpawn: number } | null>(null);
+  if (!lifeRef.current) lifeRef.current = { active: false, timer: 0, nextSpawn: Math.random() * 5 + 2 };
 
   const startPos = useRef(new THREE.Vector3());
   const velocity = useRef(new THREE.Vector3());

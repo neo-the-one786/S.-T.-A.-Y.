@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const letters = ['S', 'T', 'A', 'Y'];
+
 export default function StayReveal() {
-  const letters = ['S', 'T', 'A', 'Y'];
   const [visibleCount, setVisibleCount] = useState(0);
 
   useEffect(() => {
