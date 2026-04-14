@@ -122,7 +122,7 @@ function ShootingStar() {
 
   useFrame((_, delta) => {
     const life = lifeRef.current;
-    if (!meshRef.current) return;
+    if (!meshRef.current || !life) return;
 
     if (!life.active) {
       life.timer += delta;
