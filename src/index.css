@@ -1,0 +1,495 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════
+   S T A Y — Design System
+   Interstellar-inspired color palette & tokens
+   ═══════════════════════════════════════════ */
+
+:root {
+  /* Core palette */
+  --void: #040610;
+  --deep-space: #080d1c;
+  --nebula: #0b1228;
+  --gold: #c9a84c;
+  --gold-bright: #e8d48b;
+  --gold-dim: #7a6530;
+  --amber: #d4854a;
+  --cream: #f0ead6;
+  --cream-dim: #b8b3a0;
+  --cyan-glow: #4a8b9f;
+
+  /* Semantic */
+  --bg-primary: var(--void);
+  --bg-secondary: var(--deep-space);
+  --text-primary: var(--cream);
+  --text-secondary: var(--cream-dim);
+  --accent: var(--gold);
+  --accent-bright: var(--gold-bright);
+  --accent-dim: var(--gold-dim);
+
+  /* Typography */
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-mono: 'Space Mono', 'Courier New', monospace;
+  --font-sans: 'Inter', system-ui, sans-serif;
+
+  /* Spacing */
+  --section-padding: clamp(2rem, 6vw, 6rem);
+}
+
+/* ═══════════════════════════════════════════
+   Global Reset & Base
+   ═══════════════════════════════════════════ */
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+#root {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+::selection {
+  background: rgba(201, 168, 76, 0.35);
+  color: var(--cream);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(201, 168, 76, 0.25);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(201, 168, 76, 0.45);
+}
+
+/* ═══════════════════════════════════════════
+   Keyframe Animations
+   ═══════════════════════════════════════════ */
+
+@keyframes float-up {
+  0% {
+    transform: translateY(100vh) translateX(0px);
+    opacity: 0;
+  }
+  10% {
+    opacity: var(--mote-opacity, 0.4);
+  }
+  90% {
+    opacity: var(--mote-opacity, 0.4);
+  }
+  100% {
+    transform: translateY(-20vh) translateX(var(--mote-sway, 30px));
+    opacity: 0;
+  }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: var(--star-min-opacity, 0.3); }
+  50% { opacity: var(--star-max-opacity, 1); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(1.05); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes signal-bar {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.9; }
+}
+
+@keyframes wormhole-burst {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(3);
+  }
+}
+
+@keyframes grain {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-5%, -10%); }
+  20% { transform: translate(-15%, 5%); }
+  30% { transform: translate(7%, -25%); }
+  40% { transform: translate(-5%, 25%); }
+  50% { transform: translate(-15%, 10%); }
+  60% { transform: translate(15%, 0%); }
+  70% { transform: translate(0%, 15%); }
+  80% { transform: translate(3%, 35%); }
+  90% { transform: translate(-10%, 10%); }
+}
+
+@keyframes rotate-ring {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.02); opacity: 1; }
+}
+
+/* ═══════════════════════════════════════════
+   Film Grain Overlay
+   ═══════════════════════════════════════════ */
+
+.film-grain::after {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  right: -50%;
+  bottom: -50%;
+  width: 200%;
+  height: 200%;
+  background: transparent
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")
+    repeat;
+  animation: grain 8s steps(10) infinite;
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.5;
+}
+
+/* ═══════════════════════════════════════════
+   Dust Motes
+   ═══════════════════════════════════════════ */
+
+.dust-mote {
+  position: fixed;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--gold-bright), transparent);
+  pointer-events: none;
+  z-index: 2;
+  animation: float-up var(--mote-duration, 15s) linear infinite;
+  animation-delay: var(--mote-delay, 0s);
+  opacity: 0;
+}
+
+/* ═══════════════════════════════════════════
+   Light Leaks
+   ═══════════════════════════════════════════ */
+
+.light-leak {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+  filter: blur(80px);
+  animation: pulse-glow var(--leak-duration, 8s) ease-in-out infinite;
+  animation-delay: var(--leak-delay, 0s);
+}
+
+/* ═══════════════════════════════════════════
+   Wormhole Ring
+   ═══════════════════════════════════════════ */
+
+.wormhole-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: clamp(300px, 60vw, 600px);
+  height: clamp(300px, 60vw, 600px);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    transparent 40%,
+    rgba(201, 168, 76, 0.03) 50%,
+    rgba(201, 168, 76, 0.06) 55%,
+    rgba(74, 139, 159, 0.04) 60%,
+    transparent 70%
+  );
+  border: 1px solid rgba(201, 168, 76, 0.06);
+  animation: rotate-ring 40s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ═══════════════════════════════════════════
+   Wormhole Flash
+   ═══════════════════════════════════════════ */
+
+.wormhole-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 9997;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wormhole-flash-inner {
+  width: 100vw;
+  height: 100vh;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(240, 234, 214, 0.9) 0%,
+    rgba(232, 212, 139, 0.6) 20%,
+    rgba(201, 168, 76, 0.3) 40%,
+    transparent 70%
+  );
+  animation: wormhole-burst 1.2s ease-out forwards;
+}
+
+/* ═══════════════════════════════════════════
+   Button Styles
+   ═══════════════════════════════════════════ */
+
+.btn-primary {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem 2.5rem;
+  font-family: var(--font-mono);
+  font-size: clamp(0.7rem, 1.5vw, 0.85rem);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold-bright);
+  background: rgba(201, 168, 76, 0.06);
+  border: 1px solid rgba(201, 168, 76, 0.25);
+  border-radius: 2px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(201, 168, 76, 0.15),
+    transparent
+  );
+  transition: none;
+}
+
+.btn-primary:hover {
+  background: rgba(201, 168, 76, 0.12);
+  border-color: rgba(201, 168, 76, 0.5);
+  box-shadow:
+    0 0 30px rgba(201, 168, 76, 0.1),
+    inset 0 0 30px rgba(201, 168, 76, 0.05);
+}
+
+.btn-primary:hover::before {
+  animation: shimmer 1.5s ease-in-out;
+}
+
+.btn-primary:active {
+  transform: scale(0.97);
+}
+
+/* ═══════════════════════════════════════════
+   Music Toggle
+   ═══════════════════════════════════════════ */
+
+.music-toggle {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 100;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(201, 168, 76, 0.08);
+  border: 1px solid rgba(201, 168, 76, 0.2);
+  border-radius: 50%;
+  color: var(--gold);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.music-toggle:hover {
+  background: rgba(201, 168, 76, 0.15);
+  border-color: rgba(201, 168, 76, 0.4);
+}
+
+.music-toggle.playing {
+  box-shadow: 0 0 20px rgba(201, 168, 76, 0.2);
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════
+   Ornamental elements
+   ═══════════════════════════════════════════ */
+
+.ornament-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin: 2.5rem 0;
+}
+
+.ornament-divider .line {
+  width: clamp(40px, 12vw, 120px);
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--gold-dim),
+    transparent
+  );
+}
+
+.ornament-divider .star {
+  color: var(--gold);
+  font-size: 1rem;
+  animation: spin-slow 8s linear infinite;
+}
+
+/* ═══════════════════════════════════════════
+   Corner Marks (poem frame)
+   ═══════════════════════════════════════════ */
+
+.corner-frame {
+  position: relative;
+  padding: 2.5rem;
+}
+
+.corner-frame::before,
+.corner-frame::after {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-color: rgba(201, 168, 76, 0.35);
+  border-style: solid;
+}
+
+.corner-frame::before {
+  top: 0;
+  left: 0;
+  border-width: 1px 0 0 1px;
+}
+
+.corner-frame::after {
+  top: 0;
+  right: 0;
+  border-width: 1px 1px 0 0;
+}
+
+.corner-frame-bottom::before,
+.corner-frame-bottom::after {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-color: rgba(201, 168, 76, 0.35);
+  border-style: solid;
+}
+
+.corner-frame-bottom::before {
+  bottom: 0;
+  left: 0;
+  border-width: 0 0 1px 1px;
+}
+
+.corner-frame-bottom::after {
+  bottom: 0;
+  right: 0;
+  border-width: 0 1px 1px 0;
+}
+
+/* ═══════════════════════════════════════════
+   Signal Strength Bars
+   ═══════════════════════════════════════════ */
+
+.signal-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 18px;
+}
+
+.signal-bar {
+  width: 3px;
+  background: var(--gold);
+  border-radius: 1px;
+  animation: signal-bar 1.5s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════
+   Responsive
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 600px) {
+  .corner-frame {
+    padding: 1.5rem;
+  }
+
+  .corner-frame::before,
+  .corner-frame::after,
+  .corner-frame-bottom::before,
+  .corner-frame-bottom::after {
+    width: 16px;
+    height: 16px;
+  }
+
+  .btn-primary {
+    padding: 0.85rem 1.75rem;
+    font-size: 0.7rem;
+  }
+}
