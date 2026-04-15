@@ -79,9 +79,9 @@ function MorseTyper({ onComplete }: { onComplete: () => void }) {
       if (targetChar === '.') playBeep('dot');
       else if (targetChar === '-') playBeep('dash');
 
-      // Start flickering
+      // Start flickering — more frames & gentler timing for smoothness
       let flickerCount = 0;
-      const totalFlickers = 4 + Math.floor(Math.random() * 3);
+      const totalFlickers = 6 + Math.floor(Math.random() * 4); // 6–9 frames
 
       setChars((prev) => [...prev, { display: pickGlitch(MORSE_GLITCH), stable: false }]);
 
@@ -96,7 +96,7 @@ function MorseTyper({ onComplete }: { onComplete: () => void }) {
             if (next[currentIndex]) next[currentIndex] = { display: targetChar, stable: true };
             return next;
           });
-          setTimeout(() => typeNext(), 90);
+          setTimeout(() => typeNext(), 120);
         } else {
           setChars((prev) => {
             const next = [...prev];
@@ -104,7 +104,7 @@ function MorseTyper({ onComplete }: { onComplete: () => void }) {
             return next;
           });
         }
-      }, 50);
+      }, 65);
     }
 
     const startTimeout = setTimeout(() => typeNext(), 400);
@@ -121,8 +121,11 @@ function MorseTyper({ onComplete }: { onComplete: () => void }) {
             minWidth: c.display === ' ' ? '0.5em' : undefined,
             textAlign: 'center',
             color: c.stable ? 'var(--gold)' : 'var(--gold-bright)',
-            textShadow: c.stable ? 'none' : '0 0 10px rgba(201,168,76,0.7)',
-            transition: 'color 0.15s, text-shadow 0.2s',
+            opacity: c.stable ? 1 : 0.7 + Math.random() * 0.3,
+            textShadow: c.stable
+              ? '0 0 6px rgba(201,168,76,0.15)'
+              : '0 0 14px rgba(201,168,76,0.7), 0 0 4px rgba(201,168,76,0.4)',
+            transition: 'color 0.25s ease, text-shadow 0.3s ease, opacity 0.2s ease',
           }}
         >
           {c.display}
@@ -169,9 +172,9 @@ function InPlaceTranslator({ onComplete }: { onComplete: () => void }) {
       const targetLetter = GROUPS[gi].letter;
       groupIndex++;
 
-      // Start flickering this group
+      // Start flickering — more frames & gentler timing for smooth decode
       let flickerCount = 0;
-      const totalFlickers = 8 + Math.floor(Math.random() * 4); // 8–11 flickers
+      const totalFlickers = 12 + Math.floor(Math.random() * 5); // 12–16 frames
 
       setGroups((prev) => {
         const next = [...prev];
@@ -184,15 +187,14 @@ function InPlaceTranslator({ onComplete }: { onComplete: () => void }) {
         flickerCount++;
 
         if (flickerCount >= totalFlickers) {
-          // Resolve to the letter
           clearInterval(flickerInterval);
           setGroups((prev) => {
             const next = [...prev];
             next[gi] = { display: targetLetter, state: 'letter' };
             return next;
           });
-          // Pause, then translate next
-          setTimeout(() => translateNext(), 350);
+          // Longer pause between letters for dramatic effect
+          setTimeout(() => translateNext(), 500);
         } else {
           setGroups((prev) => {
             const next = [...prev];
@@ -200,7 +202,7 @@ function InPlaceTranslator({ onComplete }: { onComplete: () => void }) {
             return next;
           });
         }
-      }, 55);
+      }, 70);
     }
 
     const startTimeout = setTimeout(() => translateNext(), 300);
@@ -223,24 +225,23 @@ function InPlaceTranslator({ onComplete }: { onComplete: () => void }) {
               fontFamily: 'var(--font-mono)',
               fontWeight: isLetter ? 700 : 400,
               fontSize: isLetter ? '1.6em' : '1em',
+              opacity: isFlickering ? (0.6 + Math.random() * 0.4) : 1,
               color: isFlickering
                 ? 'var(--gold-bright)'
-                : isLetter
-                  ? 'var(--gold)'
-                  : 'var(--gold)',
+                : 'var(--gold)',
               textShadow: isFlickering
-                ? '0 0 12px rgba(201,168,76,0.8)'
+                ? '0 0 16px rgba(201,168,76,0.8), 0 0 6px rgba(201,168,76,0.5)'
                 : isLetter
-                  ? '0 0 20px rgba(201,168,76,0.25)'
+                  ? '0 0 25px rgba(201,168,76,0.2)'
                   : 'none',
-              transition: 'all 0.2s ease',
+              transition: 'color 0.3s ease, text-shadow 0.4s ease, font-size 0.5s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.2s ease, font-weight 0.3s ease',
               ...(isLetter
                 ? {
                     background: 'linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 50%, var(--gold-dim) 100%)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
                     backgroundClip: 'text',
-                    filter: 'drop-shadow(0 0 15px rgba(201,168,76,0.3))',
+                    filter: 'drop-shadow(0 0 20px rgba(201,168,76,0.3))',
                   }
                 : {}),
             }}

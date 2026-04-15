@@ -9,7 +9,7 @@ import WormholeFlash from './components/WormholeFlash';
 import MessageReveal from './components/MessageReveal';
 import TimeCounter from './components/TimeCounter';
 
-type Act = 'entry' | 'transmission' | 'reveal';
+type Act = 'prelude' | 'entry' | 'transmission' | 'reveal';
 
 /* ─── Audio helpers ─── */
 function fadeIn(audio: HTMLAudioElement, targetVol: number, durationMs = 2000) {
@@ -47,15 +47,15 @@ function fadeOut(audio: HTMLAudioElement, durationMs = 1500): Promise<void> {
 }
 
 export default function App() {
-  const [act, setAct] = useState<Act>('entry');
+  const [act, setAct] = useState<Act>('prelude');
   const [flashTrigger, setFlashTrigger] = useState(false);
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [showFinalScene, setShowFinalScene] = useState(false);
 
   // Three audio tracks
-  const track1Ref = useRef<HTMLAudioElement | null>(null); // stay1: Act 1
-  const track2Ref = useRef<HTMLAudioElement | null>(null); // stay2: Act 2 (morse)
-  const track3Ref = useRef<HTMLAudioElement | null>(null); // stay3: Act 2 decode → Act 3
+  const track1Ref = useRef<HTMLAudioElement | null>(null);
+  const track2Ref = useRef<HTMLAudioElement | null>(null);
+  const track3Ref = useRef<HTMLAudioElement | null>(null);
   const activeTrackRef = useRef<HTMLAudioElement | null>(null);
   const tracksLoaded = useRef({ t1: false, t2: false, t3: false });
 
@@ -79,7 +79,6 @@ export default function App() {
     t2.addEventListener('canplaythrough', () => { tracksLoaded.current.t2 = true; });
     t3.addEventListener('canplaythrough', () => { tracksLoaded.current.t3 = true; });
 
-    // Graceful fallback for missing files
     t1.addEventListener('error', () => { tracksLoaded.current.t1 = false; });
     t2.addEventListener('error', () => { tracksLoaded.current.t2 = false; });
     t3.addEventListener('error', () => { tracksLoaded.current.t3 = false; });
@@ -122,31 +121,23 @@ export default function App() {
     }
   }, [musicPlaying]);
 
-  // ─── Act 1 → Enter clicked ───
-  const handleEnter = useCallback(() => {
-    // Start track 1 on this user gesture (satisfies autoplay policy)
-    // Then immediately crossfade to track 2 for Act 2
+  // ─── Prelude → Begin clicked: start stay1 + show landing ───
+  const handleBegin = useCallback(() => {
     const t1 = track1Ref.current;
-    const t2 = track2Ref.current;
-
     if (t1 && tracksLoaded.current.t1) {
-      // Start track1 briefly so browser allows audio
-      t1.volume = 0;
-      t1.play().catch(() => {});
       activeTrackRef.current = t1;
+      fadeIn(t1, 0.45, 3000);
       setMusicPlaying(true);
+    }
+    setAct('entry');
+  }, []);
 
-      // Crossfade to track 2 after a beat
-      setTimeout(async () => {
-        if (t2 && tracksLoaded.current.t2) {
-          await switchTrack(t2, 0.55);
-        }
-      }, 500);
-    } else if (t2 && tracksLoaded.current.t2) {
-      // No track1, start track2 directly
+  // ─── Act 1 → Enter clicked: crossfade stay1 → stay2 ───
+  const handleEnter = useCallback(() => {
+    const t2 = track2Ref.current;
+    if (t2 && tracksLoaded.current.t2) {
       switchTrack(t2, 0.55);
     }
-
     setAct('transmission');
   }, [switchTrack]);
 
@@ -178,7 +169,7 @@ export default function App() {
 
   return (
     <div className="film-grain" style={{ position: 'relative', minHeight: '100vh' }}>
-      {/* Background layers */}
+      {/* Background layers — always visible */}
       <Starfield />
       <DustMotes />
       <LightLeaks />
@@ -186,8 +177,8 @@ export default function App() {
       {/* Wormhole flash */}
       <WormholeFlash trigger={flashTrigger} onComplete={handleFlashComplete} />
 
-      {/* Music toggle — visible after Act 1 */}
-      {act !== 'entry' && (
+      {/* Music toggle — visible after prelude */}
+      {act !== 'prelude' && (
         <motion.button
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -215,16 +206,103 @@ export default function App() {
 
       {/* Acts */}
       <AnimatePresence mode="wait">
+        {/* ═══ Prelude: "Begin" gate ═══ */}
+        {act === 'prelude' && (
+          <motion.div
+            key="prelude"
+            exit={{ opacity: 0 }}
+            transition={{ duration: 2 }}
+            style={{
+              position: 'relative',
+              zIndex: 10,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: '100dvh',
+              cursor: 'pointer',
+            }}
+            onClick={handleBegin}
+          >
+            {/* Subtle pulsing ring */}
+            <motion.div
+              animate={{
+                scale: [1, 1.05, 1],
+                opacity: [0.3, 0.6, 0.3],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
+              style={{
+                position: 'absolute',
+                width: '140px',
+                height: '140px',
+                borderRadius: '50%',
+                border: '1px solid rgba(201,168,76,0.15)',
+                boxShadow: '0 0 40px rgba(201,168,76,0.05), inset 0 0 40px rgba(201,168,76,0.03)',
+              }}
+            />
+
+            {/* Play icon */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 2, delay: 0.5 }}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '1.5rem',
+              }}
+            >
+              <svg
+                width="36"
+                height="36"
+                viewBox="0 0 24 24"
+                fill="none"
+                style={{ opacity: 0.7 }}
+              >
+                <polygon
+                  points="6,3 20,12 6,21"
+                  fill="none"
+                  stroke="rgba(201,168,76,0.6)"
+                  strokeWidth="1.5"
+                  strokeLinejoin="round"
+                />
+              </svg>
+
+              <p
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 'clamp(0.55rem, 1.1vw, 0.7rem)',
+                  letterSpacing: '0.4em',
+                  textTransform: 'uppercase',
+                  color: 'var(--gold-dim)',
+                  animation: 'pulse-soft 2.5s ease-in-out infinite',
+                }}
+              >
+                Begin
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* ═══ Act 1: Poem + Enter ═══ */}
         {act === 'entry' && (
           <motion.div
             key="entry"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1.5 }}
+            transition={{ duration: 2 }}
           >
             <EntryScene onEnter={handleEnter} />
           </motion.div>
         )}
 
+        {/* ═══ Act 2: Morse transmission ═══ */}
         {act === 'transmission' && (
           <motion.div
             key="transmission"
@@ -240,6 +318,7 @@ export default function App() {
           </motion.div>
         )}
 
+        {/* ═══ Act 3: Reveal ═══ */}
         {act === 'reveal' && (
           <motion.div
             key="reveal"
@@ -406,6 +485,26 @@ export default function App() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Footer */}
+      <footer
+        style={{
+          position: 'fixed',
+          bottom: '0.75rem',
+          left: 0,
+          right: 0,
+          textAlign: 'center',
+          fontFamily: 'var(--font-mono)',
+          fontSize: 'clamp(0.45rem, 0.8vw, 0.55rem)',
+          letterSpacing: '0.2em',
+          color: 'var(--gold-dim)',
+          opacity: 0.35,
+          zIndex: 20,
+          pointerEvents: 'none',
+        }}
+      >
+        Made with ❤︎ by DM
+      </footer>
     </div>
   );
 }
